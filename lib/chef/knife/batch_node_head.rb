@@ -23,7 +23,7 @@ class Chef
       def run
         STDOUT.sync = STDERR.sync = true
 
-        file_path = @named_args[0]
+        file_path = @name_args[0]
 
         if file_path.nil?
           show_usage

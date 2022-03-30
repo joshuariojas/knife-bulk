@@ -1,10 +1,10 @@
 # coding: utf-8
-$LOADPATH << File.expand_path('lib', __dir__)
+$LOAD_PATH << File.expand_path('lib', __dir__)
 require 'knife-batch/version'
 
 Gem::Specification.new do |spec|
   spec.name          = 'knife-batch'
-  spec.version       = KnifeBatch::VERSION
+  spec.version       = Knife::Batch::VERSION
   spec.authors       = ['Joshua Riojas']
   spec.license       = 'MIT'
   spec.homepage      = 'https://github.com/joshuariojas/knife-batch'

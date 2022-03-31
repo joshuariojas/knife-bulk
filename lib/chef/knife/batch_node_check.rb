@@ -1,24 +1,17 @@
 require 'chef/knife'
+require_relative 'helpers/batch_base.rb'
 
 class Chef
   class Knife
-    class BatchNodeHead < Chef::Knife
+    class BatchNodeCheck < Chef::Knife
 
       deps do
         require 'chef/json_compat' unless defined?(Chef::JSONCompat)
+        require 'chef/server_api' unless defined?(Chef::ServerAPI)
       end
 
-      banner 'knife batch node head NODE_LIST (options)'
+      banner 'knife batch node check NODE_LIST (options)'
       category 'batch'
-
-      option :append_domain,
-        short: '-ad',
-        long: '--append-domain',
-        description: 'Append domain name to each hostname within NODE_LIST during HTTP request '
-
-      def file_exists_and_readable?(path)
-        File.exist?(file) && File.readable?(file)
-      end
 
       def run
         STDOUT.sync = STDERR.sync = true
@@ -28,7 +21,6 @@ class Chef
         if file_path.nil?
           show_usage
           ui.fatal('You must specify a path to a node list')
-          #ui.error "Please specify the node list path. e.g-  'knife batch node head <path>'"
           exit 1
         end
 
@@ -37,22 +29,23 @@ class Chef
           exit 1
         end
 
-        results = {}
+        api = Chef::ServerAPI.new
+        res = {}
 
         File.foreach(file_path) do |node_name|
           next if node_name.strip! == ''
 
           begin
             api.head("nodes/#{node_name}")
-            results[node_name] = 'exists'
-          rescue NET::HTTPServerException => e
-            ui.error("Encountered NET::HTTPServerException node '#{node_name}'\n#{e}")
-            results[node_name] = 'not found'
+            res[node_name] = 'exists'
+          rescue Exception => e
+            ui.error("#{e.class} raised when checking node '#{node_name}'\n#{e}")
+            res[node_name] = 'not found'
           end
         end
 
         config[:format] = 'json'
-        ui.output(results)
+        ui.output(res)
       end
 
     end

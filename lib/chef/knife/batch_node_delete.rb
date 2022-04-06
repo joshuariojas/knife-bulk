@@ -1,8 +1,12 @@
 require 'chef/knife'
+require 'helpers/batch_node_base'
 
 class Chef
   class Knife
     class BatchNodeDelete < Chef::Knife
+
+      include Chef::Knife::BatchNodeBase
+
       banner 'knife batch node delete NODE_LIST (options)'
       category 'batch'
 

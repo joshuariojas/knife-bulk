@@ -1,51 +1,95 @@
 require 'chef/knife'
-require_relative 'helpers/batch_base.rb'
+require_relative 'helpers/batch_node_base.rb'
 
 class Chef
   class Knife
     class BatchNodeCheck < Chef::Knife
+
+      include Chef::Knife::BatchNodeBase
 
       deps do
         require 'chef/json_compat' unless defined?(Chef::JSONCompat)
         require 'chef/server_api' unless defined?(Chef::ServerAPI)
       end
 
-      banner 'knife batch node check NODE_LIST (options)'
+      banner 'knife batch node check [NODE_NAME [NODE_NAME]] (options)'
       category 'batch'
 
       def run
         STDOUT.sync = STDERR.sync = true
 
-        file_path = @name_args[0]
+        config[:format] = 'json'
 
-        if file_path.nil?
-          show_usage
-          ui.fatal('You must specify a path to a node list')
-          exit 1
-        end
+        api   = Chef::ServerAPI.new
+        nodes = batch_args
+        res   = {
+          :errors => false,
+          :items  => {
+            :nodes   => [],
+            :clients => []
+          }
+        }
 
-        unless file_exists_and_readable?(file_path)
-          ui.fatal("Could not find or open file '#{file_path}'")
-          exit 1
-        end
-
-        api = Chef::ServerAPI.new
-        res = {}
-
-        File.foreach(file_path) do |node_name|
+        nodes.each do |node_name|
           next if node_name.strip! == ''
 
           begin
             api.head("nodes/#{node_name}")
-            res[node_name] = 'exists'
+
+            results[:items][:nodes] << {
+              :node_name  => node_name,
+              :method     => 'head',
+              :successful => true
+            }
           rescue Exception => e
-            ui.error("#{e.class} raised when checking node '#{node_name}'\n#{e}")
-            res[node_name] = 'not found'
+            results[:errors] ||= true
+            code, message      = parse_exception(e)
+
+            ui.error("Encountered #{e.class} when checking node '#{node_name}'\n#{e}")
+
+            results[:items][:nodes] << {
+              :node_name  => node_name,
+              :method     => 'head',
+              :successful => false,
+              :error      => {
+                :code    => code,
+                :message => message
+              }
+            }
+          end
+
+          if config.has_key?(:skip_client)
+            ui.output(results)
+            return
+          end
+
+          begin
+            _ = api.get("clients/#{node_name}")
+
+            results[:items][:nodes] << {
+              :node_name  => node_name,
+              :method     => 'head',
+              :successful => true
+            }
+          rescue Exception => e
+            results[:errors] ||= true
+            code, message      = parse_exception(e)
+
+            ui.error("Encountered #{e.class} when checking client '#{node_name}'\n#{e}")
+
+            results[:items][:clients] << {
+              :client_name => node_name,
+              :method      => 'head',
+              :successful  => false,
+              :error       => {
+                :code    => code,
+                :message => message
+              }
+            }
           end
         end
 
-        config[:format] = 'json'
-        ui.output(res)
+        ui.output(results)
       end
 
     end

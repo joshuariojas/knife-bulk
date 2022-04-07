@@ -1,4 +1,5 @@
 require 'chef/knife'
+require_relative 'batch_shared_options'
 
 class Chef
   class Knife
@@ -6,6 +7,8 @@ class Chef
 
       def self.included(includer)
         includer.class_eval do
+
+          include Chef::Knife::BatchSharedOptions
 
           deps do
             require 'chef/json_compat' unless defined?(Chef::JSONCompat)
@@ -16,40 +19,35 @@ class Chef
             long: '--append-domain DOMAIN',
             description: 'Domain that will be appended to each node during HTTP request'
 
-          option :from_file,
-            long: '--from-file FILE',
-            description: 'File containing list of objects to pass to subcommand in place of expected argument(s)'
-
-          option :skip_client,
-            long: '--skip-client',
-            description: 'Skip checking against client objects '
-
-          if config.has_key?(:from_file)
-            file_path = config[:from_file]
-
-            if file_path.nil?
-              ui.fatal('You must specify a path to an object list')
-              exit 1
-            elsif file_exists_and_readable(file_path)
-              show_usage
-              ui.fatal("Could not find or open file '#{file_path}")
-              exit 1
-            end
-          end
+          option :include_clients,
+            long: '--[no]-include-clients',
+            description: 'Include operations against client objects',
+            boolean: true,
+            default: true
 
           def file_exists_and_readable?(path)
             File.exist?(path) && File.readable?(path)
           end
 
           def batch_args
-            if config.has_key?(:from_file) && file_exists_and_readable(config[:from_file])
-              File.readline(config[:from_file], chomp: true)
+            unless config.has_key?(:from_file)
+              return @name_args
+            end
+
+            if file_exists_and_readable?(config[:from_file])
+              File.readlines(config[:from_file], chomp: true)
             else
-              @name_args
+              show_usage
+              ui.fatal("Invalid value provided to option '--from-file'. Could not find or open file '#{config[:from_file]}'")
+              exit 1
             end
           end
 
           def parse_exception(exception)
+            # TODO
+            # Add something in here about handling different exception categories.
+            # Exception.class.to_s.include? 'HTTP'
+
             code, message = exception.message.split(' ', 2)
             return code, message.delete_suffix('"').delete_prefix('"')
           end

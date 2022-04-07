@@ -22,7 +22,7 @@ class Chef
 
         api   = Chef::ServerAPI.new
         nodes = batch_args
-        res   = {
+        resp  = {
           :errors => false,
           :items  => {
             :nodes   => [],
@@ -31,23 +31,24 @@ class Chef
         }
 
         nodes.each do |node_name|
-          next if node_name.strip! == ''
+          node_name = node_name.strip
+          next if node_name == ''
 
           begin
             api.head("nodes/#{node_name}")
 
-            results[:items][:nodes] << {
+            resp[:items][:nodes] << {
               :node_name  => node_name,
               :method     => 'head',
               :successful => true
             }
-          rescue Exception => e
-            results[:errors] ||= true
-            code, message      = parse_exception(e)
+          rescue StandardError => e
+            resp[:errors] ||= true
+            code, message   = parse_exception(e)
 
             ui.error("Encountered #{e.class} when checking node '#{node_name}'\n#{e}")
 
-            results[:items][:nodes] << {
+            resp[:items][:nodes] << {
               :node_name  => node_name,
               :method     => 'head',
               :successful => false,
@@ -58,26 +59,26 @@ class Chef
             }
           end
 
-          if config.has_key?(:skip_client)
-            ui.output(results)
+          unless config[:include_clients]
+            ui.output(resp)
             return
           end
 
           begin
             _ = api.get("clients/#{node_name}")
 
-            results[:items][:nodes] << {
-              :node_name  => node_name,
-              :method     => 'head',
-              :successful => true
+            resp[:items][:clients] << {
+              :client_name  => node_name,
+              :method      => 'head',
+              :successful  => true
             }
-          rescue Exception => e
-            results[:errors] ||= true
-            code, message      = parse_exception(e)
+          rescue StandardError => e
+            resp[:errors] ||= true
+            code, message   = parse_exception(e)
 
             ui.error("Encountered #{e.class} when checking client '#{node_name}'\n#{e}")
 
-            results[:items][:clients] << {
+            resp[:items][:clients] << {
               :client_name => node_name,
               :method      => 'head',
               :successful  => false,
@@ -89,7 +90,7 @@ class Chef
           end
         end
 
-        ui.output(results)
+        ui.output(resp)
       end
 
     end

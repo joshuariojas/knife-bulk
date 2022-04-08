@@ -35,7 +35,13 @@ class Chef
             end
 
             if file_exists_and_readable?(config[:from_file])
-              File.readlines(config[:from_file], chomp: true)
+              objects = File.readlines(config[:from_file], chomp: true).map(&:strip).reject(&:empty?)
+
+              if config.has_key?(:append_domain)
+                objects.map! { |line| "#{line}.#{config[:append_domain]}"}
+              end
+
+              objects
             else
               show_usage
               ui.fatal("Invalid value provided to option '--from-file'. Could not find or open file '#{config[:from_file]}'")
@@ -45,11 +51,17 @@ class Chef
 
           def parse_exception(exception)
             # TODO
-            # Add something in here about handling different exception categories.
-            # Exception.class.to_s.include? 'HTTP'
+            # Extend this to handling different exception categories.
+            # Exception.class.to_s.include? 'HTTP' is for handing the family of errors under net/http, but it is barely best effort
+            # Undecided on how to handle returns, maybe use code as some sort of Go-ish value, err = method(), but inverting the
+            # nil checking on code when compare to err
 
-            code, message = exception.message.split(' ', 2)
-            return code, message.delete_suffix('"').delete_prefix('"')
+            if Exception.class.to_s.include?('HTTP')
+              code, message = exception.message.split(' ', 2)
+              return message.delete_suffix('"').delete_prefix('"'), code
+            else
+              return exception.message, nil
+            end
           end
 
         end

@@ -31,9 +31,6 @@ class Chef
         }
 
         nodes.each do |node_name|
-          node_name = node_name.strip
-          next if node_name == ''
-
           begin
             api.head("nodes/#{node_name}")
 
@@ -44,7 +41,7 @@ class Chef
             }
           rescue StandardError => e
             resp[:errors] ||= true
-            code, message   = parse_exception(e)
+            message, code   = parse_exception(e)
 
             ui.error("Encountered #{e.class} when checking node '#{node_name}'\n#{e}")
 
@@ -74,7 +71,7 @@ class Chef
             }
           rescue StandardError => e
             resp[:errors] ||= true
-            code, message   = parse_exception(e)
+            message, code   = parse_exception(e)
 
             ui.error("Encountered #{e.class} when checking client '#{node_name}'\n#{e}")
 

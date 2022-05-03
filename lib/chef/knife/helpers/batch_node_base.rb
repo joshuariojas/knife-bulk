@@ -52,9 +52,12 @@ class Chef
           def parse_exception(exception)
             # TODO
             # Extend this to handling different exception categories.
-            # Exception.class.to_s.include? 'HTTP' is for handing the family of errors under net/http, but it is barely best effort
-            # Undecided on how to handle returns, maybe use code as some sort of Go-ish value, err = method(), but inverting the
-            # nil checking on code when compare to err
+            # exception.class.name.include? 'HTTP' is for handing the family of errors under net/http, but it is barely best effort
+            # Undecided on how to handle returns. Currently, the else case intends that code will be set to nil, and a caller may need to
+            # check for an exception category that is not yet support below.
+            #
+            # message, code = parse_exception(exception)
+            # if code.nil? then do the things
 
             if exception.class.name.include?('HTTP')
               code, message = exception.message.split(' ', 2)

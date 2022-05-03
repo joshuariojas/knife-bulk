@@ -1,14 +1,14 @@
 require 'chef/knife'
-require_relative 'batch_shared_options'
+require_relative 'bulk_shared_options'
 
 class Chef
   class Knife
-    module BatchNodeBase
+    module BulkNodeBase
 
       def self.included(includer)
         includer.class_eval do
 
-          include Chef::Knife::BatchSharedOptions
+          include Chef::Knife::BulkSharedOptions
 
           deps do
             require 'chef/json_compat' unless defined?(Chef::JSONCompat)
@@ -37,7 +37,7 @@ class Chef
             File.exist?(path) && File.readable?(path)
           end
 
-          def batch_args
+          def bulk_args
             unless config.has_key?(:from_file)
               if @name_args.size == 0
                 ui.fatal('You must provide at least one node name')

@@ -1,14 +1,14 @@
 require 'chef/knife'
-require_relative 'helpers/batch_node_base'
+require_relative 'helpers/bulk_node_base'
 
 class Chef
   class Knife
-    class BatchNodeDelete < Chef::Knife
+    class BulkNodeDelete < Chef::Knife
 
-      include Chef::Knife::BatchNodeBase
+      include Chef::Knife::BulkNodeBase
 
-      banner 'knife batch node delete [NODE_NAME [NODE_NAME]] (options)'
-      category 'batch'
+      banner 'knife bulk node delete [NODE_NAME [NODE_NAME]] (options)'
+      category 'bulk'
 
       def run
         STDOUT.sync = STDERR.sync = true
@@ -16,7 +16,7 @@ class Chef
         config[:format] = 'json'
 
         api   = Chef::ServerAPI.new
-        nodes = batch_args
+        nodes = bulk_args
         resp  = {
           :errors => false,
           :items  => {

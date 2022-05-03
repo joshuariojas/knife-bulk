@@ -1,6 +1,6 @@
-# knife batch
+# knife bulk
 
-Knife plugin that allows for batch requests against key Chef Server endpoints.
+Knife plugin that allows for bulk requests against key Chef Server endpoints.
 
 ## Requirements
 
@@ -11,14 +11,14 @@ A current version of Chef Infra Client that includes knife. Most easily provided
 Via Rubygems
 
 ```bash
-chef gem install knife-batch
+chef gem install knife-bulk
 ```
 
 Via Source
 
 ```bash
-git clone https://github.com/joshuariojas/knife-batch.git
-cd knife-batch
-gem build knife-batch.gemspec && gem install knife-batch-*.gem --no-ri --no-rdoc
+git clone https://github.com/joshuariojas/knife-bulk.git
+cd knife-bulk
+gem build knife-bulk.gemspec && gem install knife-bulk-*.gem --no-ri --no-rdoc
 ```
 

@@ -1,19 +1,19 @@
 require 'chef/knife'
-require_relative 'helpers/batch_node_base.rb'
+require_relative 'helpers/bulk_node_base.rb'
 
 class Chef
   class Knife
-    class BatchNodeCheck < Chef::Knife
+    class BulkNodeCheck < Chef::Knife
 
-      include Chef::Knife::BatchNodeBase
+      include Chef::Knife::BulkNodeBase
 
       deps do
         require 'chef/json_compat' unless defined?(Chef::JSONCompat)
         require 'chef/server_api' unless defined?(Chef::ServerAPI)
       end
 
-      banner 'knife batch node check [NODE_NAME [NODE_NAME]] (options)'
-      category 'batch'
+      banner 'knife bulk node check [NODE_NAME [NODE_NAME]] (options)'
+      category 'bulk'
 
       def run
         STDOUT.sync = STDERR.sync = true
@@ -21,7 +21,7 @@ class Chef
         config[:format] = 'json'
 
         api   = Chef::ServerAPI.new
-        nodes = batch_args
+        nodes = bulk_args
         resp  = {
           :errors => false,
           :items  => {

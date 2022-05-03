@@ -2,7 +2,7 @@ require 'chef/knife'
 
 class Chef
   class Knife
-    module BatchSharedOptions
+    module BulkSharedOptions
 
       def self.included(includer)
         includer.class_eval do

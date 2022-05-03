@@ -25,23 +25,37 @@ class Chef
             boolean: true,
             default: true
 
+          def append_domain(nodes)
+            if config.has_key?(:append_domain)
+              return nodes.map { |line| "#{line}.#{config[:append_domain]}" }
+            else
+              return nodes
+            end
+          end
+
           def file_exists_and_readable?(path)
             File.exist?(path) && File.readable?(path)
           end
 
           def batch_args
             unless config.has_key?(:from_file)
-              return @name_args
+              if @name_args.size == 0
+                ui.fatal('You must provide at least one node name')
+                exit 1
+              end
+
+              return append_domain(@name_args)
             end
 
             if file_exists_and_readable?(config[:from_file])
-              objects = File.readlines(config[:from_file], chomp: true).map(&:strip).reject(&:empty?)
+              nodes = File.readlines(config[:from_file], chomp: true).map(&:strip).reject(&:empty?)
 
-              if config.has_key?(:append_domain)
-                objects.map! { |line| "#{line}.#{config[:append_domain]}"}
+              if nodes.size == 0
+                ui.fatal("Invalid value provided to option '--from-file'. File '#{config[:from_file]} was empty'")
+                exit 1
               end
 
-              objects
+              return append_domain(nodes)
             else
               show_usage
               ui.fatal("Invalid value provided to option '--from-file'. Could not find or open file '#{config[:from_file]}'")

@@ -56,7 +56,7 @@ class Chef
             # Undecided on how to handle returns, maybe use code as some sort of Go-ish value, err = method(), but inverting the
             # nil checking on code when compare to err
 
-            if Exception.class.to_s.include?('HTTP')
+            if exception.class.name.include?('HTTP')
               code, message = exception.message.split(' ', 2)
               return message.delete_suffix('"').delete_prefix('"'), code
             else

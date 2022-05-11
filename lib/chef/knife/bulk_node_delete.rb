@@ -96,10 +96,11 @@ class Chef
               }
             end
           end
-
         end
 
+        ui.output(resp)
       end
+
     end
   end
 end

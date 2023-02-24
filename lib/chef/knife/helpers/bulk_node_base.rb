@@ -20,7 +20,7 @@ class Chef
             description: 'Domain that will be appended to each node during HTTP request'
 
           option :include_clients,
-            long: '--[no]-include-clients',
+            long: '--[no-]include-clients',
             description: 'Include operations against client objects',
             boolean: true,
             default: true

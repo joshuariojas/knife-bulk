@@ -8,7 +8,7 @@ Gem::Specification.new do |spec|
   spec.authors       = ['Joshua Riojas']
   spec.license       = 'MIT'
   spec.homepage      = 'https://github.com/joshuariojas/knife-bulk'
-  spec.summary       = %q{Plugin that add functionality of running bulk requests aginst Chef Infra Server.}
+  spec.summary       = %q{Plugin that adds functionality of running bulk requests against Chef Infra Server.}
   spec.description   = spec.summary
 
   spec.files         = %w{LICENSE} + Dir.glob('{lib,spec}/**/*')
